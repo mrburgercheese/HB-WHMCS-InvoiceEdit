@@ -13,13 +13,10 @@
 ## 📌 Latar Belakang & Masalah Utama di WHMCS v9
 
 Pada **WHMCS versi 9**, sistem menerapkan pembatasan akuntansi yang sangat ketat (*Strict Invoicing Lockout*):
-* **Faktur yang sudah terbit tidak dapat diedit sama sekali** (deskripsi item, nominal harga, penambahan/penghapusan baris item, hingga tanggal faktur terkunci secara permanen di antarmuka bawaan WHMCS).
-* Ketika terjadi kesalahan input harga atau negosiasi revisi harga dengan klien, WHMCS memaksa administrator untuk **membatalkan faktur lama (*Cancel*), menerbitkan *Credit Note*, lalu membuat faktur baru dari nol**.
-* **Dampak Buruk Sistem Default WHMCS**:
-  1. **Nomor Faktur Berantakan**: Klien menerima banyak nomor faktur untuk satu transaksi yang sama sehingga memicu kebingungan pembukuan.
-  2. **Bug Sisa Saldo / Potongan Mass Payment**: Jika faktur lama yang pernah di-*Cancel* diaktifkan kembali ke status *Unpaid*, WHMCS meninggalkan jejak penyesuaian kredit (*Credit Note Adjustment*) di ledger yang membuat sisa saldo menjadi **Rp 0,00** dan memunculkan potongan aneh **`Partial Payments: -Rp ...`** di halaman *Mass Payment* klien.
+* **Faktur yang sudah terbit tidak dapat diedit sama sekali**: deskripsi item, nominal harga, penambahan/penghapusan baris item, hingga tanggal faktur terkunci secara permanen di antarmuka bawaan WHMCS.
+* Ketika terjadi kesalahan input harga atau revisi kesepakatan dengan klien, admin tidak memiliki opsi langsung untuk mengubah rincian tagihan tersebut.
 
-**HB WHMCS Invoice Editor & Ledger Manager** hadir sebagai solusi definitif: mengembalikan kebebasan admin untuk mengoreksi faktur secara langsung tanpa perlu repot menerbitkan faktur baru, sekaligus menjaga kepatuhan akuntansi melalui sistem **Audit Trail Log (Before vs After)** dan **Manajemen Pembersihan Ledger Otomatis**.
+**HB WHMCS Invoice Editor & Ledger Manager** hadir sebagai solusi definitif: mengembalikan kebebasan admin untuk mengoreksi faktur secara langsung di tempat tanpa ribet, sekaligus menjaga kepatuhan akuntansi melalui sistem **Audit Trail Log (Before vs After)** dan **Manajemen Pembersihan Ledger Transaksi**.
 
 ---
 
@@ -27,7 +24,7 @@ Pada **WHMCS versi 9**, sistem menerapkan pembatasan akuntansi yang sangat ketat
 
 | Fitur | Penjelasan Singkat |
 | :--- | :--- |
-| 📝 **Koreksi Langsung Tanpa Bikin Faktur Baru** | Edit nominal harga, deskripsi item, hapus baris, atau tambah item baru langsung pada faktur yang sama di WHMCS v9. |
+| 📝 **Koreksi Langsung di Tempat** | Edit nominal harga, deskripsi item, hapus baris, atau tambah item baru langsung pada faktur yang sama di WHMCS v9. |
 | 📅 **Pengaturan Tanggal & Due Date (Backdate)** | Sesuaikan tanggal faktur dan batas jatuh tempo tanpa mengganggu siklus cron perpanjangan otomatis. |
 | 🛡️ **Zero-Deduction Recovery Engine** | Otomatis membersihkan *Credit Note* (`tblbillingnotes`) & penyesuaian ledger (`tblaccounts`) saat mengembalikan status ke Unpaid agar tidak muncul saldo minus. |
 | 🧹 **Manajemen Ledger & Transaksi Terkunci** | Tinjau dan hapus transaksi penyesuaian kredit bawaan WHMCS yang terkunci hanya dengan satu klik. |
@@ -86,20 +83,14 @@ Pada **WHMCS versi 9**, sistem menerapkan pembatasan akuntansi yang sangat ketat
 
 ```
 [ Masalah Standar WHMCS v9 ]
-Ada salah input harga / deskripsi pada Invoice #100
-   ├──> ❌ WHMCS v9 melarang edit faktur yang sudah terbit.
-   ├──> Admin terpaksa mengubah status menjadi 'Cancelled' (Terbit Credit Note otomatis).
-   ├──> Admin terpaksa membuat Invoice Baru #101 (Nomor faktur ganda, klien bingung).
-   └──> Jika Invoice #100 coba dibuka lagi ke 'Unpaid', saldonya menjadi Rp 0 dan 
-        muncul potongan minus "-Rp 100.000 Partial Payment" di halaman Mass Payment.
+Ada salah input harga / deskripsi / item pada Invoice #100
+   └──> ❌ WHMCS v9 mengunci faktur yang sudah terbit sehingga tidak bisa diedit sama sekali.
 
 [ Solusi Praktis HB Invoice Edit ]
 Invoice #100 langsung dibuka melalui modul HB Invoice Edit
-   ├──> ✅ Admin langsung merevisi harga/item pada Invoice #100 tanpa perlu membuat invoice baru.
-   ├──> ✅ Opsi [✓] "Otomatis Bersihkan Credit Note" aktif saat status diset ke Unpaid.
-   ├──> ✅ Modul membersihkan record penyesuaian di tblaccounts & tblbillingnotes.
-   └──> 🎯 HASIL: Faktur tetap menggunakan nomor asli #100, nominal tagihan utuh,
-        dan halaman Mass Payment klien 100% bersih tanpa potongan minus.
+   ├──> ✅ Admin dapat langsung merevisi harga, deskripsi, tanggal, dan baris item pada Invoice #100.
+   ├──> ✅ Mengoreksi data langsung di tempat tanpa perlu membuat invoice baru.
+   └──> 🎯 HASIL: Nomor faktur tetap rapi menggunakan nomor asli #100 dan tercatat lengkap di Audit Log.
 ```
 
 ---

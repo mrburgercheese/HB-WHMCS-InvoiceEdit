@@ -10,16 +10,16 @@
 
 ---
 
-## 📌 Ringkasan Modul
+## 📌 Latar Belakang & Masalah Utama di WHMCS v9
 
-**HB WHMCS Invoice Editor & Ledger Manager** adalah modul addon resmi untuk WHMCS yang dirancang khusus untuk memberikan kendali penuh kepada staf dan administrator dalam mengoreksi faktur (invoice), menyesuaikan rincian item, mengatur ulang pajak, serta membersihkan riwayat ledger / penyesuaian kredit.
+Pada **WHMCS versi 9**, sistem menerapkan pembatasan akuntansi yang sangat ketat (*Strict Invoicing Lockout*):
+* **Faktur yang sudah terbit tidak dapat diedit sama sekali** (deskripsi item, nominal harga, penambahan/penghapusan baris item, hingga tanggal faktur terkunci secara permanen di antarmuka bawaan WHMCS).
+* Ketika terjadi kesalahan input harga atau negosiasi revisi harga dengan klien, WHMCS memaksa administrator untuk **membatalkan faktur lama (*Cancel*), menerbitkan *Credit Note*, lalu membuat faktur baru dari nol**.
+* **Dampak Buruk Sistem Default WHMCS**:
+  1. **Nomor Faktur Berantakan**: Klien menerima banyak nomor faktur untuk satu transaksi yang sama sehingga memicu kebingungan pembukuan.
+  2. **Bug Sisa Saldo / Potongan Mass Payment**: Jika faktur lama yang pernah di-*Cancel* diaktifkan kembali ke status *Unpaid*, WHMCS meninggalkan jejak penyesuaian kredit (*Credit Note Adjustment*) di ledger yang membuat sisa saldo menjadi **Rp 0,00** dan memunculkan potongan aneh **`Partial Payments: -Rp ...`** di halaman *Mass Payment* klien.
 
-Pada sistem standar WHMCS, proses pengeditan invoice memiliki banyak keterbatasan. Masalah paling umum terjadi ketika admin mengubah status invoice dari **Cancelled** kembali menjadi **Unpaid**:
-* Sistem WHMCS secara otomatis menerbitkan **Credit Note / Billing Adjustment** saat pembatalan.
-* Ketika status diubah kembali ke Unpaid, penyesuaian kredit tersebut tetap tertinggal di ledger akun (`tblaccounts`).
-* Akibatnya, saldo tagihan menjadi **Rp 0,00** dan pada halaman checkout *Mass Payment* klien muncul potongan minus **`Partial Payments: -Rp ...`** yang membingungkan pelanggan.
-
-**Modul HB Invoice Edit menyelesaikan masalah ini secara tuntas** melalui manajemen ledger cerdas dan pencatatan audit log perubahan yang lengkap (*Before vs After*).
+**HB WHMCS Invoice Editor & Ledger Manager** hadir sebagai solusi definitif: mengembalikan kebebasan admin untuk mengoreksi faktur secara langsung tanpa perlu repot menerbitkan faktur baru, sekaligus menjaga kepatuhan akuntansi melalui sistem **Audit Trail Log (Before vs After)** dan **Manajemen Pembersihan Ledger Otomatis**.
 
 ---
 
@@ -27,17 +27,17 @@ Pada sistem standar WHMCS, proses pengeditan invoice memiliki banyak keterbatasa
 
 | Fitur | Penjelasan Singkat |
 | :--- | :--- |
-| 📝 **Edit Rincian Item Bebas** | Tambah baris baru, ubah deskripsi, nominal harga, dan status pajak per item secara dinamis. |
-| 📅 **Pengaturan Tanggal & Due Date** | Koreksi tanggal penerbitan invoice (*backdate*) dan batas jatuh tempo tanpa merusak siklus layanan. |
-| 🛡️ **Zero-Deduction Recovery** | Fitur otomatisasi pembersihan Credit Note (`tblbillingnotes`) & penyesuaian ledger (`tblaccounts`) saat mengembalikan status ke Unpaid. |
-| 🧹 **Manajemen Ledger Transaksi** | Tinjau seluruh transaksi pembayaran/penyesuaian dan hapus record penyesuaian yang terkunci langsung dengan satu klik. |
-| 🔍 **Jejak Audit Visual (Diff)** | Mencatat setiap sesi perubahan di tabel audit log dengan snapshot JSON lengkap (*Kondisi Sebelum vs Sesudah*). |
-| 🔒 **Wajib Isi Alasan Koreksi** | Memastikan kepatuhan akuntansi dengan mewajibkan admin mengisi justifikasi perubahan sebelum data disimpan. |
-| ⚡ **Shortcut Button di Admin WHMCS** | Tombol navigasi cepat **"Edit Invoice (HB)"** langsung muncul di halaman bawaan `invoices.php?action=edit`. |
+| 📝 **Koreksi Langsung Tanpa Bikin Faktur Baru** | Edit nominal harga, deskripsi item, hapus baris, atau tambah item baru langsung pada faktur yang sama di WHMCS v9. |
+| 📅 **Pengaturan Tanggal & Due Date (Backdate)** | Sesuaikan tanggal faktur dan batas jatuh tempo tanpa mengganggu siklus cron perpanjangan otomatis. |
+| 🛡️ **Zero-Deduction Recovery Engine** | Otomatis membersihkan *Credit Note* (`tblbillingnotes`) & penyesuaian ledger (`tblaccounts`) saat mengembalikan status ke Unpaid agar tidak muncul saldo minus. |
+| 🧹 **Manajemen Ledger & Transaksi Terkunci** | Tinjau dan hapus transaksi penyesuaian kredit bawaan WHMCS yang terkunci hanya dengan satu klik. |
+| 🔍 **Jejak Audit Visual (Before vs After Diff)** | Setiap koreksi dicatat secara permanen dalam format snapshot JSON lengkap sehingga histori keuangan tetap transparan dan terlacak. |
+| 🔒 **Wajib Justifikasi / Alasan Koreksi** | Mencegah perubahan sepihak dengan mewajibkan admin mengisi alasan revisi faktur untuk kebutuhan audit internal. |
+| ⚡ **Shortcut Button di Admin WHMCS** | Tombol navigasi **"Edit Invoice (HB)"** terintegrasi langsung di layar bawaan `invoices.php?action=edit`. |
 
 ---
 
-## 🔄 Alur Kerja & Diagram Arsitektur
+## 🔄 Alur Kerja & Perbandingan Solusi
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -60,18 +60,12 @@ Pada sistem standar WHMCS, proses pengeditan invoice memiliki banyak keterbatasa
              ┌─────────────────────────┴─────────────────────────┐
              ▼                                                   ▼
 ┌─────────────────────────────┐             ┌─────────────────────────────────┐
-│   1. Koreksi Data Faktur    │             │    2. Kelola Ledger/Transaksi   │
+│ 1. Koreksi Langsung di TKP  │             │   2. Bersihkan Ledger & Saldo   │
 ├─────────────────────────────┤             ├─────────────────────────────────┤
-│ • Ubah Deskripsi / Harga    │             │ • Pantau Riwayat tblaccounts    │
-│ • Tambah / Hapus Baris Item │             │ • Hapus Single Transaksi        │
-│ • Ubah Tanggal / Due Date   │             │ • Bersihkan Semua Penyesuaian   │
-│ • Status: Unpaid/Paid/Draft │             │ • Kembalikan Tagihan Jadi Penuh │
-└─────────────────────────────┘             └─────────────────────────────────┘
-             │                                                   │
-             ▼                                                   ▼
-┌─────────────────────────────┐             ┌─────────────────────────────────┐
-│  Otomatis Bersihkan Credit  │             │   Sinkronisasi Saldo & Balance  │
-│    Note saat Revert Unpaid  │             │    Klien Bebas Potongan Minus   │
+│ • Revisi Harga / Deskripsi  │             │ • Deteksi Credit Note Tertinggal│
+│ • Tambah / Hapus Baris Item │             │ • Hapus Transaksi Penyesuaian   │
+│ • Ubah Tanggal / Due Date   │             │ • Pulihkan Balance Menjadi 100% │
+│ • Status: Unpaid/Paid/Draft │             │ • Hapus Potongan Minus Klien    │
 └─────────────────────────────┘             └─────────────────────────────────┘
              │                                                   │
              └─────────────────────────┬─────────────────────────┘
@@ -88,27 +82,31 @@ Pada sistem standar WHMCS, proses pengeditan invoice memiliki banyak keterbatasa
 
 ---
 
-### Perbandingan Masalah WHMCS Bawaan vs Solusi Modul
+### Perbandingan Masalah WHMCS v9 vs Solusi Modul HB Invoice Edit
 
 ```
-[ Masalah WHMCS Standar ]
-Invoice #100 (Status: Unpaid, Nominal: Rp 100.000)
-   └──> Admin mengubah status ke 'Cancelled' (WHMCS otomatis membuat Credit Note #19)
-   └──> Admin mengembalikan status ke 'Unpaid'
-   └──> ❌ MASALAH: Balance terhitung Rp 0,00 dan di Mass Payment muncul "-Rp 100.000 Partial Payment"
+[ Masalah Standar WHMCS v9 ]
+Ada salah input harga / deskripsi pada Invoice #100
+   ├──> ❌ WHMCS v9 melarang edit faktur yang sudah terbit.
+   ├──> Admin terpaksa mengubah status menjadi 'Cancelled' (Terbit Credit Note otomatis).
+   ├──> Admin terpaksa membuat Invoice Baru #101 (Nomor faktur ganda, klien bingung).
+   └──> Jika Invoice #100 coba dibuka lagi ke 'Unpaid', saldonya menjadi Rp 0 dan 
+        muncul potongan minus "-Rp 100.000 Partial Payment" di halaman Mass Payment.
 
-[ Solusi HB Invoice Edit ]
-Invoice #100 dibuka via modul HB Invoice Edit
-   └──> Admin memilih 'Unpaid' + [✓] Otomatis Bersihkan Credit Note / Adjustment
-   └──> 🛡️ Modul otomatis menghapus riwayat penyesuaian di tblaccounts & tblbillingnotes
-   └──> ✅ HASIL: Status Unpaid bersih, Sisa Tagihan Rp 100.000 utuh, Mass Payment normal tanpa minus!
+[ Solusi Praktis HB Invoice Edit ]
+Invoice #100 langsung dibuka melalui modul HB Invoice Edit
+   ├──> ✅ Admin langsung merevisi harga/item pada Invoice #100 tanpa perlu membuat invoice baru.
+   ├──> ✅ Opsi [✓] "Otomatis Bersihkan Credit Note" aktif saat status diset ke Unpaid.
+   ├──> ✅ Modul membersihkan record penyesuaian di tblaccounts & tblbillingnotes.
+   └──> 🎯 HASIL: Faktur tetap menggunakan nomor asli #100, nominal tagihan utuh,
+        dan halaman Mass Payment klien 100% bersih tanpa potongan minus.
 ```
 
 ---
 
 ## 🗄️ Dampak Database & Tabel yang Dimodifikasi
 
-Modul ini beroperasi secara aman menggunakan `WHMCS\Database\Capsule` (Laravel Database Query Builder) tanpa merusak relasi integritas data WHMCS.
+Modul ini beroperasi secara aman menggunakan `WHMCS\Database\Capsule` (Laravel Database Query Builder) tanpa merusak integritas database WHMCS.
 
 ### 1. Tabel Khusus Modul: `mod_hb_invoice_corrections_log`
 Dibuat otomatis saat modul pertama kali diaktifkan untuk merekam jejak audit keuangan.

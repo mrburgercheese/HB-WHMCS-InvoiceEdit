@@ -1,168 +1,194 @@
 # HB WHMCS Invoice Editor & Ledger Manager
 
 <p align="center">
-  <img src="https://img.shields.io/badge/WHMCS-v8.x%20--%20v9.x%20Ready-0070ba?style=for-the-badge&logo=whmcs&logoColor=white" alt="WHMCS Version" />
-  <img src="https://img.shields.io/badge/PHP-7.4%20|%208.1%20|%208.2%20|%208.3%20|%208.4-777bb4?style=for-the-badge&logo=php&logoColor=white" alt="PHP Versions" />
-  <img src="https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge" alt="License MIT" />
-  <img src="https://img.shields.io/badge/Version-1.2.0-blue.svg?style=for-the-badge" alt="Version 1.2.0" />
-  <img src="https://img.shields.io/badge/Security-Audit%20Logged-success?style=for-the-badge&logo=shield" alt="Audit Log" />
+  <img src="https://img.shields.io/badge/WHMCS-v8.x%20--%20v9.x%20Siap%20Pakai-0070ba?style=for-the-badge&logo=whmcs&logoColor=white" alt="Versi WHMCS" />
+  <img src="https://img.shields.io/badge/PHP-7.4%20|%208.1%20|%208.2%20|%208.3%20|%208.4-777bb4?style=for-the-badge&logo=php&logoColor=white" alt="Versi PHP" />
+  <img src="https://img.shields.io/badge/Lisensi-MIT-green.svg?style=for-the-badge" alt="Lisensi MIT" />
+  <img src="https://img.shields.io/badge/Versi-1.2.0-blue.svg?style=for-the-badge" alt="Versi 1.2.0" />
+  <img src="https://img.shields.io/badge/Keamanan-Audit%20Log%20Lengkap-success?style=for-the-badge&logo=shield" alt="Audit Log" />
 </p>
 
 ---
 
-## 📌 Overview
+## 📌 Ringkasan Modul
 
-**HB WHMCS Invoice Editor & Ledger Manager** is an enterprise-grade addon module for WHMCS designed to give administrators full control over invoice corrections, line-item adjustments, tax recalibrations, and ledger cleanup.
+**HB WHMCS Invoice Editor & Ledger Manager** adalah modul addon resmi untuk WHMCS yang dirancang khusus untuk memberikan kendali penuh kepada staf dan administrator dalam mengoreksi faktur (invoice), menyesuaikan rincian item, mengatur ulang pajak, serta membersihkan riwayat ledger / penyesuaian kredit.
 
-Standard WHMCS invoice editing is often restrictive and prone to unintended side effects — particularly when reopening cancelled invoices where automatically generated **Credit Notes / Billing Adjustments** distort client balances and cause unwanted negative partial payment deductions (`-Rp / -$`) on Mass Payment checkouts.
+Pada sistem standar WHMCS, proses pengeditan invoice memiliki banyak keterbatasan. Masalah paling umum terjadi ketika admin mengubah status invoice dari **Cancelled** kembali menjadi **Unpaid**:
+* Sistem WHMCS secara otomatis menerbitkan **Credit Note / Billing Adjustment** saat pembatalan.
+* Ketika status diubah kembali ke Unpaid, penyesuaian kredit tersebut tetap tertinggal di ledger akun (`tblaccounts`).
+* Akibatnya, saldo tagihan menjadi **Rp 0,00** dan pada halaman checkout *Mass Payment* klien muncul potongan minus **`Partial Payments: -Rp ...`** yang membingungkan pelanggan.
 
-**HB Invoice Edit** solves this by providing:
-1. **Dynamic Line-Item & Pricing Modification** with realtime subtotal and tax calculation.
-2. **Ledger & Credit Note Manager** to easily purge orphan adjustment records and restore 100% full invoice balance.
-3. **Smart Revert to Unpaid Engine** that automatically cleans up cancellation adjustments when switching status back to Unpaid.
-4. **Complete Audit Trail & Visual Diff (Before vs After)** storing immutable records of who edited what, when, and why.
-5. **Seamless WHMCS Admin UI Integration** with 1-click shortcut buttons on native invoice pages.
+**Modul HB Invoice Edit menyelesaikan masalah ini secara tuntas** melalui manajemen ledger cerdas dan pencatatan audit log perubahan yang lengkap (*Before vs After*).
 
 ---
 
-## 🚀 Key Features
+## 🚀 Fitur Unggulan
 
-| Feature | Description |
+| Fitur | Penjelasan Singkat |
 | :--- | :--- |
-| 📝 **Full Line-Item Editing** | Add, modify, or delete invoice line items, descriptions, amounts, and taxability dynamically. |
-| 📅 **Backdate & Due Date Control** | Modify invoice issue dates and payment due dates without breaking recurrence cycles. |
-| 🛡️ **Zero-Deduction Recovery** | Automatically purge residual Credit Notes (`tblbillingnotes`) and ledger adjustments (`tblaccounts`) when reverting invoices to Unpaid. |
-| 🧹 **Direct Ledger Transaction Manager** | View all linked transaction IDs and remove locked adjustment credits directly with one click. |
-| 🔍 **Audit Trail & Visual Diff** | Records every modification in `mod_hb_invoice_corrections_log` with JSON snapshots (Before vs After modal inspection). |
-| 🔒 **Mandatory Correction Reasons** | Requires staff administrators to supply a reason for every adjustment, enforcing strict financial accountability. |
-| ⚡ **One-Click Invoice Hook** | Injects an **"Edit Invoice (HB)"** button directly into the native WHMCS `invoices.php?action=edit` screen. |
+| 📝 **Edit Rincian Item Bebas** | Tambah baris baru, ubah deskripsi, nominal harga, dan status pajak per item secara dinamis. |
+| 📅 **Pengaturan Tanggal & Due Date** | Koreksi tanggal penerbitan invoice (*backdate*) dan batas jatuh tempo tanpa merusak siklus layanan. |
+| 🛡️ **Zero-Deduction Recovery** | Fitur otomatisasi pembersihan Credit Note (`tblbillingnotes`) & penyesuaian ledger (`tblaccounts`) saat mengembalikan status ke Unpaid. |
+| 🧹 **Manajemen Ledger Transaksi** | Tinjau seluruh transaksi pembayaran/penyesuaian dan hapus record penyesuaian yang terkunci langsung dengan satu klik. |
+| 🔍 **Jejak Audit Visual (Diff)** | Mencatat setiap sesi perubahan di tabel audit log dengan snapshot JSON lengkap (*Kondisi Sebelum vs Sesudah*). |
+| 🔒 **Wajib Isi Alasan Koreksi** | Memastikan kepatuhan akuntansi dengan mewajibkan admin mengisi justifikasi perubahan sebelum data disimpan. |
+| ⚡ **Shortcut Button di Admin WHMCS** | Tombol navigasi cepat **"Edit Invoice (HB)"** langsung muncul di halaman bawaan `invoices.php?action=edit`. |
 
 ---
 
-## 🔄 Workflow Architecture & Alur Kerja
-
-```mermaid
-flowchart TD
-    A[WHMCS Admin: invoices.php] -->|Click Shortcut| B[HB Invoice Edit Module]
-    B --> C{Select Action}
-    
-    C -->|1. Edit Items / Dates / Status| D[Modify Line Items, Tax, & Status]
-    D --> E{Status Changed to Unpaid?}
-    E -->|Yes & Auto-Clean Active| F[Purge Cancellation Credit Notes & Adjustments]
-    E -->|No| G[Keep Existing Ledger]
-    F --> H[Update tblinvoices & tblinvoiceitems]
-    G --> H
-    H --> I[Record Immutable JSON Snapshot in Audit Log]
-    I --> J[Write WHMCS System Activity Log]
-    
-    C -->|2. Ledger Management| K[View Linked tblaccounts Records]
-    K -->|Delete Single Transaction| L[Remove Specific tblaccounts + tblbillingnotes]
-    K -->|Clear All Transactions| M[Wipe All Linked Transactions & Reset Balance to Full Total]
-    L --> J
-    M --> J
-```
-
-### Problem & Solution Alur Diagram
+## 🔄 Alur Kerja & Diagram Arsitektur
 
 ```
-[ Traditional WHMCS Issue ]
-Invoice #100 (Unpaid, Rp 100.000) 
-  ──> Admin Sets to 'Cancelled' (WHMCS issues Credit Note #19 for -Rp 100.000)
-  ──> Admin Changes back to 'Unpaid'
-  ──> ❌ BUG: Balance becomes Rp 0,00 and Mass Payment shows "-Rp 100.000 Partial Payment"
-
-[ HB Invoice Edit Solution ]
-Invoice #100 in HB Invoice Edit
-  ──> Admin Selects 'Unpaid' + [✓] Auto Clean Adjustments
-  ──> 🛡️ HB Engine automatically removes orphan Credit Note & tblaccounts adjustment
-  ──> ✅ SUCCESS: Status is Unpaid, Balance is Rp 100.000 (Full), Mass Payment is Clean!
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                       ALUR KERJA HB INVOICE EDIT                            │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                       │
+                                       ▼
+                 ┌───────────────────────────────────────────┐
+                 │  Halaman Detail Invoice di Admin WHMCS    │
+                 │        (invoices.php?action=edit)         │
+                 └───────────────────────────────────────────┘
+                                       │
+                   [ Klik Tombol "Edit Invoice (HB)" ]
+                                       │
+                                       ▼
+                 ┌───────────────────────────────────────────┐
+                 │     Modul Addon: HB Invoice Editor        │
+                 └───────────────────────────────────────────┘
+                                       │
+             ┌─────────────────────────┴─────────────────────────┐
+             ▼                                                   ▼
+┌─────────────────────────────┐             ┌─────────────────────────────────┐
+│   1. Koreksi Data Faktur    │             │    2. Kelola Ledger/Transaksi   │
+├─────────────────────────────┤             ├─────────────────────────────────┤
+│ • Ubah Deskripsi / Harga    │             │ • Pantau Riwayat tblaccounts    │
+│ • Tambah / Hapus Baris Item │             │ • Hapus Single Transaksi        │
+│ • Ubah Tanggal / Due Date   │             │ • Bersihkan Semua Penyesuaian   │
+│ • Status: Unpaid/Paid/Draft │             │ • Kembalikan Tagihan Jadi Penuh │
+└─────────────────────────────┘             └─────────────────────────────────┘
+             │                                                   │
+             ▼                                                   ▼
+┌─────────────────────────────┐             ┌─────────────────────────────────┐
+│  Otomatis Bersihkan Credit  │             │   Sinkronisasi Saldo & Balance  │
+│    Note saat Revert Unpaid  │             │    Klien Bebas Potongan Minus   │
+└─────────────────────────────┘             └─────────────────────────────────┘
+             │                                                   │
+             └─────────────────────────┬─────────────────────────┘
+                                       │
+                                       ▼
+                 ┌───────────────────────────────────────────┐
+                 │       Pencatatan Audit Trail Log          │
+                 ├───────────────────────────────────────────┤
+                 │ • Simpan Snapshot JSON Sebelum & Sesudah  │
+                 │ • Catat Alasan Perubahan, Admin, & IP     │
+                 │ • Tulis Catatan ke WHMCS Activity Log     │
+                 └───────────────────────────────────────────┘
 ```
 
 ---
 
-## 🗄️ Database Modifications & Schema Impact
+### Perbandingan Masalah WHMCS Bawaan vs Solusi Modul
 
-This module interacts with native WHMCS tables safely via the WHMCS Database Capsule (Laravel Eloquent Query Builder) and introduces one dedicated audit log table.
+```
+[ Masalah WHMCS Standar ]
+Invoice #100 (Status: Unpaid, Nominal: Rp 100.000)
+   └──> Admin mengubah status ke 'Cancelled' (WHMCS otomatis membuat Credit Note #19)
+   └──> Admin mengembalikan status ke 'Unpaid'
+   └──> ❌ MASALAH: Balance terhitung Rp 0,00 dan di Mass Payment muncul "-Rp 100.000 Partial Payment"
 
-### 1. New Custom Table: `mod_hb_invoice_corrections_log`
-Created automatically upon module activation.
+[ Solusi HB Invoice Edit ]
+Invoice #100 dibuka via modul HB Invoice Edit
+   └──> Admin memilih 'Unpaid' + [✓] Otomatis Bersihkan Credit Note / Adjustment
+   └──> 🛡️ Modul otomatis menghapus riwayat penyesuaian di tblaccounts & tblbillingnotes
+   └──> ✅ HASIL: Status Unpaid bersih, Sisa Tagihan Rp 100.000 utuh, Mass Payment normal tanpa minus!
+```
 
-| Column | Type | Description |
+---
+
+## 🗄️ Dampak Database & Tabel yang Dimodifikasi
+
+Modul ini beroperasi secara aman menggunakan `WHMCS\Database\Capsule` (Laravel Database Query Builder) tanpa merusak relasi integritas data WHMCS.
+
+### 1. Tabel Khusus Modul: `mod_hb_invoice_corrections_log`
+Dibuat otomatis saat modul pertama kali diaktifkan untuk merekam jejak audit keuangan.
+
+| Kolom | Tipe Data | Keterangan |
 | :--- | :--- | :--- |
-| `id` | `INT(10) AUTO_INCREMENT` | Primary key |
-| `invoice_id` | `INT(11)` | Target WHMCS Invoice ID (`tblinvoices.id`) |
-| `client_id` | `INT(11)` | Client User ID (`tblclients.id`) |
-| `client_name` | `VARCHAR(150)` | Cached client full name for fast reporting |
-| `admin_user` | `VARCHAR(50)` | Username of the administrator executing the change |
-| `old_total` | `DECIMAL(10,2)` | Invoice total prior to correction |
-| `new_total` | `DECIMAL(10,2)` | Invoice total after correction |
-| `reason` | `TEXT` | Mandatory justification entered by admin |
-| `old_snapshot` | `LONGTEXT (JSON)` | Full serialized state of invoice + line items before edit |
-| `new_snapshot` | `LONGTEXT (JSON)` | Full serialized state of invoice + line items after edit |
-| `ip_address` | `VARCHAR(50)` | Admin remote IP address |
-| `created_at` | `TIMESTAMP` | Timestamp of modification |
+| `id` | `INT(10) AUTO_INCREMENT` | Primary Key |
+| `invoice_id` | `INT(11)` | ID Faktur WHMCS yang diedit (`tblinvoices.id`) |
+| `client_id` | `INT(11)` | ID Pengguna / Klien (`tblclients.id`) |
+| `client_name` | `VARCHAR(150)` | Nama lengkap klien saat koreksi dilakukan |
+| `admin_user` | `VARCHAR(50)` | Username staf/admin yang mengeksekusi koreksi |
+| `old_total` | `DECIMAL(10,2)` | Total tagihan sebelum diedit |
+| `new_total` | `DECIMAL(10,2)` | Total tagihan baru setelah diedit |
+| `reason` | `TEXT` | Alasan justifikasi koreksi yang diinput oleh admin |
+| `old_snapshot` | `LONGTEXT (JSON)` | Salinan lengkap seluruh field invoice & item lama |
+| `new_snapshot` | `LONGTEXT (JSON)` | Salinan lengkap seluruh field invoice & item baru |
+| `ip_address` | `VARCHAR(50)` | Alamat IP admin pengeksekusi |
+| `created_at` | `TIMESTAMP` | Waktu pencatatan riwayat |
 
-### 2. Modified Native WHMCS Tables
+### 2. Tabel Bawaan WHMCS yang Terhubung
 
-| Table | Operation | Impact & Safe Handling |
+| Nama Tabel | Operasi | Penanganan Keamanan Data |
 | :--- | :--- | :--- |
-| `tblinvoices` | `UPDATE` | Updates `date`, `duedate`, `status`, `paymentmethod`, `subtotal`, `tax`, `taxrate`, `total`, `updated_at`. |
-| `tblinvoiceitems` | `DELETE` & `INSERT` | Rebuilds line items cleanly for the specific `invoiceid` to ensure total mathematical consistency. |
-| `tblaccounts` | `DELETE` *(Conditional)* | Deletes specific adjustment records (`type = 'invoice_billing_adjustment_credit'`) or cleared transactions when explicitly requested by admin. |
-| `tblbillingnotes` | `DELETE` *(Conditional)* | Cleans orphan Credit Note headers linked via `billingnoteid`. |
-| `tblbillingnoteitems`| `DELETE` *(Conditional)* | Cleans orphan Credit Note item entries linked via `billingnote_id`. |
+| `tblinvoices` | `UPDATE` | Memperbarui tanggal faktur, jatuh tempo, status, metode bayar, subtotal, pajak, dan total tagihan. |
+| `tblinvoiceitems` | `DELETE` & `INSERT` | Menata ulang item tagihan secara akurat agar sinkron dengan total nilai faktur. |
+| `tblaccounts` | `DELETE` *(Kondisional)* | Menghapus record penyesuaian (`type = 'invoice_billing_adjustment_credit'`) atau transaksi yang dipilih admin saat reset saldo. |
+| `tblbillingnotes` | `DELETE` *(Kondisional)* | Membersihkan data header Credit Note saat penyesuaian dibatalkan. |
+| `tblbillingnoteitems`| `DELETE` *(Kondisional)* | Membersihkan rincian item Credit Note yang terikat pada invoice. |
 
 ---
 
-## 💻 System Requirements
+## 💻 Kebutuhan Sistem (System Requirements)
 
-* **WHMCS**: `v8.0.0` through `v9.x` (Tested & fully compatible)
-* **PHP**: `7.4`, `8.0`, `8.1`, `8.2`, `8.3`, `8.4`
-* **Database**: `MySQL 5.7+` or `MariaDB 10.3+`
-* **PHP Extensions**: `PDO`, `pdo_mysql`, `json`, `mbstring`
-* **WHMCS Admin Permissions**: Full Administrator or Addon Modules access privileges
+* **Versi WHMCS**: `v8.0.0` sampai `v9.x` (Kompatibel penuh)
+* **Versi PHP**: `7.4`, `8.0`, `8.1`, `8.2`, `8.3`, `8.4`
+* **Database**: `MySQL 5.7+` atau `MariaDB 10.3+`
+* **Ekstensi PHP**: `PDO`, `pdo_mysql`, `json`, `mbstring`
+* **Hak Akses Admin**: Administrator atau Role Group dengan izin Addon Modules
 
 ---
 
-## 📦 Installation & Setup
+## 📦 Panduan Instalasi & Pemasangan
 
-### Step 1: Upload Files
-Upload the `hb_invoice_editor` folder to your WHMCS addons directory:
+### Langkah 1: Unggah Berkas Modul
+Ekstrak atau salin folder `hb_invoice_editor` ke direktori modul WHMCS Anda:
 ```bash
-/path/to/whmcs/modules/addons/hb_invoice_editor/
+/path-ke-whmcs/modules/addons/hb_invoice_editor/
 ├── hb_invoice_editor.php
 ├── hooks.php
 ├── README.md
 └── LICENSE
 ```
 
-### Step 2: Activate in WHMCS Admin
-1. Log in to your **WHMCS Admin Area**.
-2. Navigate to **System Settings** (🔧) > **Addon Modules** (or **Setup > Addon Modules** in WHMCS 7/8).
-3. Locate **HB Invoice Edit** and click **Activate**.
-4. Click **Configure** to grant access permissions to your Administrator Role Groups (e.g. *Full Administrator*).
+### Langkah 2: Aktivasi di Admin WHMCS
+1. Masuk ke halaman **Admin WHMCS**.
+2. Buka menu **System Settings** (ikon kunci) > **Addon Modules** (atau **Setup > Addon Modules** di versi WHMCS sebelumnya).
+3. Cari **HB Invoice Edit** lalu klik tombol **Activate**.
+4. Klik tombol **Configure** pada modul tersebut, lalu centang grup admin yang diizinkan mengakses (misalnya: *Full Administrator*).
 
-### Step 3: Access the Module
-* Access directly via **Addons > HB Invoice Edit**.
-* Or open any invoice in **Billing > Invoices > Edit Invoice** and click the **"Edit Invoice (HB)"** button in the header.
-
----
-
-## 🛡️ Security & Quality Standards
-
-* **CSRF Protection**: All form submissions and state mutations are guarded with WHMCS native token verification (`check_token('WHMCS.admin.default')`).
-* **Prepared Statements**: All database operations utilize `WHMCS\Database\Capsule` to guarantee zero SQL injection vulnerability.
-* **Granular Audit Logging**: Double-layer logging in both the internal database table and WHMCS native `logActivity()`.
-* **Zero External Dependencies**: Pure standalone PHP/JS module without external CDN trackers or heavy vendor bundles.
+### Langkah 3: Penggunaan
+* Buka menu **Addons > HB Invoice Edit** pada panel admin.
+* Atau buka salah satu faktur di menu **Billing > Invoices > Edit Invoice**, lalu klik tombol shortcut **"Edit Invoice (HB)"** di bagian atas.
 
 ---
 
-## 📄 License
+## 🛡️ Standar Keamanan & Perlindungan Data
 
-This project is open-source software licensed under the **[MIT License](LICENSE)**.
+* **Perlindungan CSRF**: Semua aksi form dan mutasi database diproteksi oleh token resmi WHMCS (`check_token('WHMCS.admin.default')`).
+* **Prepared Statements**: Menggunakan *WHMCS Capsule Query Builder* sehingga kebal terhadap ancaman SQL Injection.
+* **Double-Layer Audit Logging**: Setiap modifikasi dicatat ganda pada tabel database modul dan fungsi `logActivity()` bawaan WHMCS.
+* **Tanpa Dependensi Luar**: Murni berjalan mandiri menggunakan pustaka internal WHMCS tanpa script eksternal atau pelacak pihak ketiga.
+
+---
+
+## 📄 Lisensi
+
+Modul ini merupakan perangkat lunak *open-source* di bawah lisensi **[MIT License](LICENSE)**.
 
 ---
 
 <p align="center">
-  Crafted with ❤️ by <strong>HB Dev Team</strong> for the WHMCS Community.
+  Dikembangkan oleh <strong>HB Dev Team</strong> untuk Komunitas Web Hosting &amp; WHMCS.
 </p>
